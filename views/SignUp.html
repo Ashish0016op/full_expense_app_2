@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<style>
+    body {
+        background-color: #7988ad99;
+    }
+    .signUp-form {
+        margin-top: 87px;
+        margin-left: 29%;
+        margin-right: 51%;
+    }
+    .show_image {
+        background-image: url(/img/tamanna-rumee-7OCUyev2M9E-unsplash.jpg);
+        background-size: 261px 433px;
+        background-repeat: no-repeat;
+        text-align: center;
+        margin-right: 18px;
+        height: 445px;
+        width: 260px;
+        border-radius: 17px 0px 0px 17px;
+    }
+    .container{
+        display: flex;
+        background-color: beige;
+        border-radius: 17px;
+        width: 627px;
+        height: 433px;
+    }
+    .flex {
+        margin-top: 57px;
+        margin-left: 55px;
+    }
+</style>
+<body>
+    <form class="signUp-form" action="/sign_up" method="POST">
+        <div class="container">
+            <div class="show_image">
+                <h2 style="padding-top: 148px;color: brown;">Expense Tracker</h2>
+            </div>
+            <div class="flex">
+                <h3 style="text-align: center;">Sign Up</h3>
+                <div class="form-group">
+                    <label for="InputName">Username</label><br>
+                    <input type="text" class="form-control" id="InputName" placeholder="Enter Name" name="Username">
+                </div>
+                <div class="form-group">
+                <label for="exampleInputEmail1">Email address</label><br>
+                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" name="email">
+                </div>
+                <div class="form-group">
+                <label for="exampleInputPassword1">Password</label><br>
+                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" name="password">
+                </div>
+                <button type="submit" id="buttn" class="btn btn-primary">Sign Up</button>
+                <p id="errorLogin" style="color: red;"></p>
+                <div class="loginPage">
+                    <h5>Already have an account <a href="/login">login</a></h5>
+                </div>
+            </div>
+        </div>
+
+      </form>
+      <script>
+        const buttn=document.getElementById('buttn');
+        buttn.addEventListener('click',postData);
+        async function postData(e){
+            e.preventDefault();
+            try{
+                const Username=document.getElementById('InputName').value;
+                const email=document.getElementById('exampleInputEmail1').value;
+                const password=document.getElementById('exampleInputPassword1').value;
+                const data={
+                    Username:Username,
+                    email:email,
+                    password:password
+                }
+                let flag=true;
+                const userExistsResponse = await axios.get('http://localhost:5500/user_login');
+                for(let i=0;i<userExistsResponse.data.userDetails.length;i++){
+                    if (userExistsResponse.data.userDetails[i].email===email) {
+                        const errorMessage = document.getElementById('errorLogin');
+                        errorMessage.innerHTML = 'User already exists';
+                        errorMessage.style.display = 'block';
+                        flag=false;
+                        break;
+                    }
+                }
+                if(flag===true){
+                    const response = await axios.post('http://localhost:5500/signUp', data);
+                    window.location.href = 'http://localhost:5500/login';
+                }
+
+                
+            }catch (error){
+                console.log(error);
+                console.log('error');
+            }
+        }
+      </script>
+</body>
+</html>

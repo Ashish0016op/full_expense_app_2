@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin-left: 125px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        .container2 {
+            width: 80%;
+            margin-left: 125px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            margin-top: 31px;
+        }
+        
+        table {
+            width: 100%;
+            height: 0;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        #Month {
+            margin-top: 34px;
+        }
+        th {
+            background-color: rgb(15, 180, 221);
+        }
+        .IncomeRow{
+            background-color: rgb(152, 226, 244);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="text-align: center;color: #0bb1b7;">Day to Day Expenses</h2>
+        <div id="date" style="font-size: 11px;color: #0e00e2;"></div>
+        <h3 id="year" style="text-align: center;"></h3>
+        <div id="Month" style="text-align: center;"></div>
+        <table id="expensesTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Income</th>
+                    <th>Expense</th>
+                </tr>
+            </thead>
+            <tbody id="expensesBody">
+            </tbody>
+        </table>
+    </div>
+    <div class="container2">
+        <h4 style="text-align: center;">Yearly Report</h4>
+        <table id="YearlyTable">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Income</th>
+                    <th>Expense</th>
+                    <th>Saving</th>
+                </tr>
+            </thead>
+            <tbody id="expensesBody2">
+            </tbody>
+        </table>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const datePrint = document.getElementById('date');
+            const expensesBody = document.getElementById('expensesBody');
+            const expensesBody2=document.getElementById('expensesBody2');
+            const token = localStorage.getItem('token');
+            const page = 1;
+            const itemsPerPage = 10;
+
+            axios.get(`http://localhost:5500/get_expense?page=${page}&itemsPerPage=${itemsPerPage}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                const monthNames = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
+
+                let totalExpenses = 0;
+                let totalIncome=0;
+                response.data.getExpense.forEach(expense => {
+                    const YearPrint=document.getElementById('year');
+                    const MonthPrint=document.getElementById('Month');
+                    const row = document.createElement('tr');
+                    const date = new Date(expense.createdAt);
+                    const recentDate = date.getDate();
+                    const month = monthNames[date.getMonth()];
+                    const year = date.getFullYear();
+                    YearPrint.innerHTML=year;
+                    MonthPrint.innerHTML=month+" "+year;
+                    const wholeDate = `${recentDate} ${month} ${year}`;
+                    if (expense.category !== 'Income') {
+                        row.innerHTML = `
+                            <td>${wholeDate}</td>
+                            <td>${expense.description}</td>
+                            <td>${expense.category}</td>
+                            <td></td>
+                            <td>${expense.expense_amount}</td>
+                        `;
+                        totalExpenses += expense.expense_amount;
+                        expensesBody.appendChild(row);
+                    } else {
+                        row.innerHTML = `
+                            <td></td>
+                            <td></td>
+                            <td>${expense.category}</td>
+                            <td>${expense.expense_amount}</td>
+                            <td>${totalExpenses}</td>
+                        `;
+                        totalIncome+=expense.expense_amount;
+                        row.className='IncomeRow';
+                        
+                        expensesBody.appendChild(row);
+                    }
+                    
+                });
+                const expense=response.data.getExpense[0].createdAt;
+                const date = new Date(expense);
+                 const month = monthNames[date.getMonth()]
+                console.log(expense);
+                const row2 = document.createElement('tr');
+                    row2.innerHTML=`
+                        <td>${month}</td>
+                        <td>${totalIncome}</td>
+                        <td>${totalExpenses}</td>
+                        <td>${totalIncome-totalExpenses}</td>
+                    `
+                expensesBody2.appendChild(row2);
+                datePrint.innerHTML = new Date().toLocaleString();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

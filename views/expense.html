@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<style>
+    #head {
+        text-align: center;
+        color: white;
+        background-color: #098393;
+        margin-top: -22px;
+        margin-right: -8px;
+        margin-left: -16px;
+        height: 96px;
+    }
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+    }
+    .formContainer {
+        background-color: aliceblue;
+        padding-left: 49%;
+        padding-top: 40px;
+        padding-bottom: 41px;
+        margin-left: 25%;
+        margin-right: 49%;
+        margin-top: 6%;
+    }
+    
+    #expense-form label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        
+    }
+    #expense-form input {
+        width: 97%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    #expense-form {
+        margin-left: -678px;
+    }
+    select#category {
+        width: 99%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    button#buttn {
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    button#premiumButton {
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    .detailContainer {
+        margin-left: -677px;
+    }
+    button:hover {
+        background-color: #087296;
+        color: hsl(0, 0%, 98%);
+        cursor: pointer;
+    }
+</style>
+<body>
+    <div id="head"><h1 style="padding-top: 24px;">Expense Tracker</h1></div>
+    <div class="formContainer">
+        <form id="expense-form" action="/expense" method="POST">
+            <h2 style="text-align: center;">Expense app</h2>
+            <label for="chooseExpense">Enter Expense Amount</label><br>
+            <input type="number" id="expenseAmount" name="expenseAmount"><br>
+            <label for="chooseDescription">Choose Description</label><br>
+            <input type="text" id="chooseDescription" name="Description"><br>
+            <label for="category">Choose Category</label><br>
+            <select name="chooseCategory" id="category">
+                <option id="food">food</option>
+                <option id="fuel">fuel</option>
+                <option id="electricity">electricity</option>
+                <option id="movie">movie</option>
+                <option id="income">Income</option>
+            </select><br>
+            <div id="premiumButtn">
+                <button type="submit" id="buttn">Add Expenses</button>
+                <button type="submit" id="premiumButton">Buy Premium</button>
+            </div>
+            
+        </form>
+        <div class="detailContainer">
+            <h2 id="form2">Expenses Details</h2>
+            <ul id="addExpensesDetails"></ul>
+            <div class="flexpage" style="display: flex;">
+                <div id="pagination"></div>
+                <div class="noOfExpenseToShow">
+                    <select name="chooseOption" id="selectNoOfExpensesToShow">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+                
+            
+        </div>
+    </div>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        const premiumButton=document.getElementById('premiumButton');
+        premiumButton.addEventListener('click',getPremium);
+        async function getPremium(e){
+            e.preventDefault();
+            const token=localStorage.getItem('token');
+            const response=await axios.get('http://localhost:5500/pending_prem',{
+                headers: {
+                        'Authorization': `Bearer ${token}`
+                }
+            })
+            console.log(response.data);
+            var options={
+                "key":response.data.key_id,
+                "order_id":response.data.order.id,
+                "handler":async function (paymentResponse){
+                    await axios.post('http://localhost:5500/success_trans',{
+                        order_id:options.order_id,
+                        payment_id:paymentResponse.razorpay_payment_id,
+                    },{
+                        headers: {
+                        'Authorization': `Bearer ${token}`
+                        }
+                    })
+                    alert('you are a premium user now');
+                    window.location.href='/premiumDash';
+                }
+            }
+            const rzp1= new Razorpay(options);
+            rzp1.open();
+            e.preventDefault();
+            rzp1.on('payment.failed',function(response){
+                console.log('response');
+                alert('something went wrong');
+            })
+        }
+        const buttn=document.getElementById('buttn');
+        buttn.addEventListener('click',postData);
+        async function postData(e){
+            e.preventDefault();
+                const expenseAmount=document.getElementById('expenseAmount').value;
+                const Description=document.getElementById('chooseDescription').value;
+                const category=document.getElementById('category').value;
+                const data={
+                    "expense_amount":expenseAmount,
+                    "description":Description,
+                    "category":category,
+                }
+            try{
+                const token=localStorage.getItem('token');
+                console.log(token);
+                const response = await axios.post('http://localhost:5500/expense', data, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                console.log(response);
+                const addExpensesDetails=document.getElementById('addExpensesDetails');
+                const list=document.createElement('li');
+                const btn=document.createElement('button');
+                btn.addEventListener('click',async()=>{
+                    list.remove();
+                    await deleteData(response.data.expenseData.response.signupDatumId);
+                })
+                btn.textContent='Delete expense';
+                list.innerHTML=expenseAmount+" - "+Description+" - "+category+" - ";
+                list.appendChild(btn);
+                addExpensesDetails.appendChild(list);
+            }catch (error){
+                console.log(error);
+            }
+                
+        }
+
+        const itemsPerPageSelect = document.getElementById('selectNoOfExpensesToShow');
+        itemsPerPageSelect.addEventListener('change', fetchData);
+        document.addEventListener('DOMContentLoaded', fetchData);
+
+        async function fetchData(e) {
+            e.preventDefault();
+            try {
+                const page = 1;
+                const itemsPerPageSelect = document.getElementById('selectNoOfExpensesToShow');
+                const itemsPerPage = parseInt(itemsPerPageSelect.value);
+                const token = localStorage.getItem('token');
+                console.log(token);
+                const response = await axios.get(`http://localhost:5500/get_expense?page=${page}&itemsPerPage=${itemsPerPage}`, {
+                    headers : {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+                console.log(response.data);
+                showPagination(response.data);
+                const isPrem = localStorage.getItem('isPremium');
+                if (isPrem === 'true') {
+                    window.location.href = '/premiumDash';
+                }
+
+                const getExpense = response.data.getExpense;
+                updateUI(getExpense);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        function showPagination({
+            currentPage,
+            hasNextPage,
+            nextPage,
+            hasPreviousPage,
+            previousPage,
+            lastPage
+        }) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            if (hasPreviousPage) {
+                const btn2 = document.createElement('button');
+                btn2.textContent = 'Pre';
+                btn2.addEventListener('click', () => getDetailsPage(previousPage));
+                pagination.appendChild(btn2);
+            }
+
+            const btn1 = document.createElement('button');
+            btn1.innerHTML = currentPage;
+            btn1.addEventListener('click', () => getDetailsPage(currentPage));
+            pagination.appendChild(btn1);
+
+            if (hasNextPage) {
+                const btn3 = document.createElement('button');
+                btn3.textContent = 'Next';
+                btn3.addEventListener('click', () => getDetailsPage(nextPage));
+                pagination.appendChild(btn3);
+            }
+        }
+
+        async function updateUI(expenses) {
+            const addExpensesDetails = document.getElementById('addExpensesDetails');
+            addExpensesDetails.innerHTML = '';
+
+            expenses.forEach(expense => {
+                const list = document.createElement('li');
+                const btn = document.createElement('button');
+                btn.textContent = 'Delete expense';
+
+                btn.addEventListener('click', async () => {
+                    list.remove();
+                    await deleteData(expense.id);
+                });
+
+                list.innerHTML = `${expense.expense_amount} - ${expense.description} - ${expense.category} - `;
+                list.appendChild(btn);
+                addExpensesDetails.appendChild(list);
+            });
+        }
+
+        async function getDetailsPage(page) {
+            try {
+                const token = localStorage.getItem('token');
+                const itemsPerPageSelect = document.getElementById('selectNoOfExpensesToShow');
+                const itemsPerPage = parseInt(itemsPerPageSelect.value);
+
+                const response = await axios.get(`http://localhost:5500/get_expense?page=${page}&itemsPerPage=${itemsPerPage}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                updateUI(response.data.getExpense);
+                showPagination({
+                    currentPage: response.data.currentPage,
+                    itemsPerPage: response.data.itemsPerPage,
+                    totalItems: response.data.totalItems,
+                    hasNextPage: response.data.hasNextPage,
+                    nextPage: response.data.nextPage,
+                    hasPreviousPage: response.data.hasPreviousPage,
+                    previousPage: response.data.previousPage,
+                    lastPage: response.data.lastPage
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        async function deleteData(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.delete(`http://localhost:5500/delete_expense/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                console.log(response);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    </script>
+</body>
+</html>
