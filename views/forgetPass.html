@@ -25,7 +25,7 @@
 
                 }
                 const token=localStorage.getItem('token');
-                const response=await axios.post('http://localhost:5500/forgotpassword',userDetails,{
+                const response=await axios.post('http://50.19.191.228:5500/forgotpassword',userDetails,{
                     headers : {
                         Authorization: `Bearer ${token}`,
                     }

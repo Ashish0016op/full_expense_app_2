@@ -81,7 +81,7 @@
                 const email = document.getElementById('exampleInputEmail1').value;
                 const password = document.getElementById('exampleInputPassword1').value;
 
-                const response = await axios.post('http://localhost:5500/login', {
+                const response = await axios.post('http://50.19.191.228:5500/login', {
                     email: email,
                     password: password,
                     
@@ -89,10 +89,10 @@
                 if (response.status === 200 && response.data.message === 'Login successful') {
                     if (response.data.isPremium1) {
                         window.alert('Login successful as Premium user');
-                        window.location.href = "/premiumDash";
+                        window.location.href = "http://50.19.191.228:5500/premiumDash";
                     } else {
                         window.alert('Login successful');
-                        window.location.href = "/expense";
+                        window.location.href = "http://50.19.191.228:5500/expense";
                     }
                     localStorage.setItem('token', response.data.token);
                     localStorage.setItem('isPremium',response.data.isPremium1);

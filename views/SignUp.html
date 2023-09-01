@@ -81,7 +81,7 @@
                     password:password
                 }
                 let flag=true;
-                const userExistsResponse = await axios.get('http://localhost:5500/user_login');
+                const userExistsResponse = await axios.get('http://50.19.191.228:5500/user_login');
                 for(let i=0;i<userExistsResponse.data.userDetails.length;i++){
                     if (userExistsResponse.data.userDetails[i].email===email) {
                         const errorMessage = document.getElementById('errorLogin');
@@ -92,8 +92,8 @@
                     }
                 }
                 if(flag===true){
-                    const response = await axios.post('http://localhost:5500/signUp', data);
-                    window.location.href = 'http://localhost:5500/login';
+                    const response = await axios.post('http://50.19.191.228:5500/signUp', data);
+                    window.location.href = "http://50.19.191.228:5500/login";
                 }
 
                 

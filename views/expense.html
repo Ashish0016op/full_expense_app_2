@@ -121,7 +121,7 @@
         async function getPremium(e){
             e.preventDefault();
             const token=localStorage.getItem('token');
-            const response=await axios.get('http://localhost:5500/pending_prem',{
+            const response=await axios.get('http://50.19.191.228:5500/pending_prem',{
                 headers: {
                         'Authorization': `Bearer ${token}`
                 }
@@ -131,7 +131,7 @@
                 "key":response.data.key_id,
                 "order_id":response.data.order.id,
                 "handler":async function (paymentResponse){
-                    await axios.post('http://localhost:5500/success_trans',{
+                    await axios.post('http://50.19.191.228:5500/success_trans',{
                         order_id:options.order_id,
                         payment_id:paymentResponse.razorpay_payment_id,
                     },{
@@ -140,7 +140,7 @@
                         }
                     })
                     alert('you are a premium user now');
-                    window.location.href='/premiumDash';
+                    window.location.href="http://50.19.191.228:5500/premiumDash";
                 }
             }
             const rzp1= new Razorpay(options);
@@ -166,7 +166,7 @@
             try{
                 const token=localStorage.getItem('token');
                 console.log(token);
-                const response = await axios.post('http://localhost:5500/expense', data, {
+                const response = await axios.post('http://50.19.191.228:5500/expense', data, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -201,7 +201,7 @@
                 const itemsPerPage = parseInt(itemsPerPageSelect.value);
                 const token = localStorage.getItem('token');
                 console.log(token);
-                const response = await axios.get(`http://localhost:5500/get_expense?page=${page}&itemsPerPage=${itemsPerPage}`, {
+                const response = await axios.get(`http://50.19.191.228:5500/get_expense?page=${page}&itemsPerPage=${itemsPerPage}`, {
                     headers : {
                         Authorization: `Bearer ${token}`,
                     }
@@ -210,7 +210,7 @@
                 showPagination(response.data);
                 const isPrem = localStorage.getItem('isPremium');
                 if (isPrem === 'true') {
-                    window.location.href = '/premiumDash';
+                    window.location.href = "http://50.19.191.228:5500/premiumDash";
                 }
 
                 const getExpense = response.data.getExpense;
@@ -277,7 +277,7 @@
                 const itemsPerPageSelect = document.getElementById('selectNoOfExpensesToShow');
                 const itemsPerPage = parseInt(itemsPerPageSelect.value);
 
-                const response = await axios.get(`http://localhost:5500/get_expense?page=${page}&itemsPerPage=${itemsPerPage}`, {
+                const response = await axios.get(`http://50.19.191.228:5500/get_expense?page=${page}&itemsPerPage=${itemsPerPage}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -302,7 +302,7 @@
         async function deleteData(id) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.delete(`http://localhost:5500/delete_expense/${id}`, {
+                const response = await axios.delete(`http://50.19.191.228:5500/delete_expense/${id}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
