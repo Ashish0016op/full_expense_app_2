@@ -3,105 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Expenses</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <style>
     body {
-        background-color: #7988ad99;
+        background-color: bisque;
     }
-    .signUp-form {
-        margin-top: 87px;
-        margin-left: 29%;
-        margin-right: 51%;
+    .formContainer {
+        border: 2px solid;
+        background-color: aliceblue;
+        padding-left: 6%;
+        padding-top: 57px;
+        padding-bottom: 41px;
+        margin-left: 27%;
+        margin-right: 49%;
+        margin-top: 6%;
     }
-    .show_image {
-        background-image: url(/img/tamanna-rumee-7OCUyev2M9E-unsplash.jpg);
-        background-size: 261px 433px;
-        background-repeat: no-repeat;
-        text-align: center;
-        margin-right: 18px;
-        height: 445px;
-        width: 260px;
-        border-radius: 17px 0px 0px 17px;
+    .detailContainer {
+        border: 2px solid;
+        background-color: aliceblue;
+        padding-left: 6%;
+        padding-top: 38px;
+        padding-bottom: 173px;
+        margin-left: 27%;
+        margin-right: 49%;
+        margin-top: 0%;
     }
-    .container{
-        display: flex;
-        background-color: beige;
-        border-radius: 17px;
-        width: 627px;
-        height: 433px;
-    }
-    .flex {
-        margin-top: 57px;
-        margin-left: 55px;
+    ul#addExpensesDetails {
+        margin-left: -68px;
     }
 </style>
 <body>
-    <form class="signUp-form" action="/sign_up" method="POST">
-        <div class="container">
-            <div class="show_image">
-                <h2 style="padding-top: 148px;color: brown;">Expense Tracker</h2>
+    <div class="formContainer">
+        <form action="/expense" method="POST">
+            <h2>Expense app</h2>
+            <label for="chooseExpense">Enter Expense Amount</label><br>
+            <input type="number" id="expenseAmount" name="expenseAmount"><br>
+            <label for="chooseDescription">Choose Description</label><br>
+            <input type="text" id="chooseDescription" name="Description"><br>
+            <label for="category">Choose Category</label><br>
+            <select name="chooseCategory" id="category">
+                <option id="food">food</option>
+                <option id="fuel">fuel</option>
+                <option id="electricity">electricity</option>
+                <option id="movie">movie</option>
+                <option id="Income">Income</option>
+            </select><br>
+            <div id="premiumButtn">
+                <button type="submit" id="buttn">Add Expenses</button>
             </div>
-            <div class="flex">
-                <h3 style="text-align: center;">Sign Up</h3>
-                <div class="form-group">
-                    <label for="InputName">Username</label><br>
-                    <input type="text" class="form-control" id="InputName" placeholder="Enter Name" name="Username">
-                </div>
-                <div class="form-group">
-                <label for="exampleInputEmail1">Email address</label><br>
-                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" name="email">
-                </div>
-                <div class="form-group">
-                <label for="exampleInputPassword1">Password</label><br>
-                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" name="password">
-                </div>
-                <button type="submit" id="buttn" class="btn btn-primary">Sign Up</button>
-                <p id="errorLogin" style="color: red;"></p>
-                <div class="loginPage">
-                    <h5>Already have an account <a href="/login">login</a></h5>
-                </div>
+            <div class="premiumUser">
+                <h3>you are a premium user</h3>
+                <button type="submit" id="showLeaderBoard">ShowLeaderBoard</button>
+                <button type="submit" id="downloadExpense">download</button>
+                <button type="submit" id="expenseDetails">expensesDetails</button>
+            </div>
+            
+        </form>
+    </div>
+    <div class="detailContainer">
+        <h2 id="form2">Expenses Details</h2>
+        <ul id="addExpensesDetails"></ul>
+        <div class="flexpage" style="display: flex;">
+            <div id="pagination"></div>
+            <div class="noOfExpenseToShow">
+                <select name="chooseOption" id="selectNoOfExpensesToShow">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                </select>
             </div>
         </div>
+    </div>
+    <div id="leaderboard"></div>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        const downloadExp=document.getElementById('downloadExpense');
+        downloadExp.addEventListener('click',downloadExpense);
+        async function downloadExpense(e){
+            e.preventDefault();
+            try{
+                const token=localStorage.getItem('token');
+                const response=await axios.get('http://50.19.191.228:5500/download',{
+                    headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                });
+                var a=document.createElement('a');
+                a.href=response.data.fileURL;
+                a.download='myexpense.csv';
+                a.click();
+            }catch(err){
+                console.log(err);
+            }
+        }
+        const expensesDetails=document.getElementById('expenseDetails');
+        expensesDetails.addEventListener('click',showDetails);
+        async function showDetails(e){
+            e.preventDefault();
+            try{
+                window.location.href="/expensesDetails";
+            }catch(err){
+                console.log(err);
+            }
+        }
+        const ShowLeaderBoard=document.getElementById('showLeaderBoard');
+        const leaderboardContainer=document.getElementById('leaderboard');
+        ShowLeaderBoard.addEventListener('click',getAllData);
+        async function getAllData(e) {
+                e.preventDefault();
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await axios.get('http://50.19.191.228:5500/AllData', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    console.log(response.data);
+                    const data = response.data;
+                    leaderboardContainer.innerHTML = '';
+                    
+                    data.forEach((user, index) => {
+                        const userDiv = document.createElement('div');
+                        userDiv.className = 'user-entry';
+                        userDiv.innerHTML = `
+                            <span class="user-name">Name - ${user.Username}  </span>
+                            <span class="total-expenses">Total Expenses - ${user.TotalExpense.totalExpense}</span>
+                        `;
+                        leaderboardContainer.appendChild(userDiv);
+                    });
+                } catch (error) {
+                    console.error(error);
+                }
+        }
 
-      </form>
-      <script>
         const buttn=document.getElementById('buttn');
         buttn.addEventListener('click',postData);
         async function postData(e){
             e.preventDefault();
-            try{
-                const Username=document.getElementById('InputName').value;
-                const email=document.getElementById('exampleInputEmail1').value;
-                const password=document.getElementById('exampleInputPassword1').value;
+                const expenseAmount=document.getElementById('expenseAmount').value;
+                const Description=document.getElementById('chooseDescription').value;
+                const category=document.getElementById('category').value;
                 const data={
-                    Username:Username,
-                    email:email,
-                    password:password
+                    "expense_amount":expenseAmount,
+                    "description":Description,
+                    "category":category,
                 }
-                let flag=true;
-                const userExistsResponse = await axios.get('http://:5500/user_login');
-                for(let i=0;i<userExistsResponse.data.userDetails.length;i++){
-                    if (userExistsResponse.data.userDetails[i].email===email) {
-                        const errorMessage = document.getElementById('errorLogin');
-                        errorMessage.innerHTML = 'User already exists';
-                        errorMessage.style.display = 'block';
-                        flag=false;
-                        break;
+            try{
+                const token=localStorage.getItem('token');
+                const response = await axios.post('http://50.19.191.228:5500/expense', data, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
                     }
-                }
-                if(flag===true){
-                    const response = await axios.post('http://50.19.191.228:5500/signUp', data);
-                    window.location.href = 'http://50.19.191.228:5500/login';
-                }
-
-                
+                });
+                const addExpensesDetails=document.getElementById('addExpensesDetails');
+                const list=document.createElement('li');
+                const btn=document.createElement('button');
+                btn.addEventListener('click',async()=>{
+                    list.remove();
+                    await deleteData(response.data.expenseData.response.id);
+                })
+                btn.textContent='Delete expense';
+                list.innerHTML=expenseAmount+" - "+Description+" - "+category+" - ";
+                list.appendChild(btn);
+                addExpensesDetails.appendChild(list);
             }catch (error){
                 console.log(error);
-                console.log('error');
+            }
+                
+        }
+        const itemsPerPageSelect = document.getElementById('selectNoOfExpensesToShow');
+        itemsPerPageSelect.addEventListener('change', fetchData);
+        document.addEventListener('DOMContentLoaded', fetchData);
+
+        async function fetchData(e) {
+            e.preventDefault();
+            try {
+                const page = 1;
+                const itemsPerPageSelect = document.getElementById('selectNoOfExpensesToShow');
+                const itemsPerPage = parseInt(itemsPerPageSelect.value);
+                console.log(itemsPerPage);
+                const token = localStorage.getItem('token');
+                const response = await axios.get(`http://50.19.191.228:5500/get_expense?page=${page}&itemsPerPage=${itemsPerPage}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                showPagination(response.data);
+
+                const getExpense = response.data.getExpense;
+                updateUI(getExpense);
+            } catch (error) {
+                console.log(error);
             }
         }
-      </script>
+
+        function showPagination({
+            currentPage,
+            hasNextPage,
+            nextPage,
+            hasPreviousPage,
+            previousPage,
+            lastPage
+        }) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            if (hasPreviousPage) {
+                const btn2 = document.createElement('button');
+                btn2.textContent = 'Pre';
+                btn2.addEventListener('click', () => getDetailsPage(previousPage));
+                pagination.appendChild(btn2);
+            }
+
+            const btn1 = document.createElement('button');
+            btn1.innerHTML = currentPage;
+            btn1.addEventListener('click', () => getDetailsPage(currentPage));
+            pagination.appendChild(btn1);
+
+            if (hasNextPage) {
+                const btn3 = document.createElement('button');
+                btn3.textContent = 'Next';
+                btn3.addEventListener('click', () => getDetailsPage(nextPage));
+                pagination.appendChild(btn3);
+            }
+        }
+
+        async function updateUI(expenses) {
+            const addExpensesDetails = document.getElementById('addExpensesDetails');
+            addExpensesDetails.innerHTML = '';
+
+            expenses.forEach(expense => {
+                const list = document.createElement('li');
+                const btn = document.createElement('button');
+                btn.textContent = 'Delete expense';
+
+                btn.addEventListener('click', async () => {
+                    list.remove();
+                    await deleteData(expense.id);
+                });
+
+                list.innerHTML = `${expense.expense_amount} - ${expense.description} - ${expense.category} - `;
+                list.appendChild(btn);
+                addExpensesDetails.appendChild(list);
+            });
+        }
+
+        async function getDetailsPage(page) {
+            try {
+                const token = localStorage.getItem('token');
+                const itemsPerPageSelect = document.getElementById('selectNoOfExpensesToShow');
+                const itemsPerPage = parseInt(itemsPerPageSelect.value);
+
+                const response = await axios.get(`http://50.19.191.228:5500/get_expense?page=${page}&itemsPerPage=${itemsPerPage}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                updateUI(response.data.getExpense);
+                showPagination({
+                    currentPage: response.data.currentPage,
+                    itemsPerPage: response.data.itemsPerPage,
+                    totalItems: response.data.totalItems,
+                    hasNextPage: response.data.hasNextPage,
+                    nextPage: response.data.nextPage,
+                    hasPreviousPage: response.data.hasPreviousPage,
+                    previousPage: response.data.previousPage,
+                    lastPage: response.data.lastPage
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        async function deleteData(id){
+            try{
+                const token=localStorage.getItem('token');
+                const response=await axios.delete(`http://50.19.191.228:5500/delete_expense/${id}`,{
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            }
+            catch(error){
+                console.log(error);
+            }
+        }
+    </script>
 </body>
 </html>
