@@ -7,36 +7,94 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <style>
+    #head {
+        text-align: center;
+        color: white;
+        background-color: #098393;
+        margin-top: -22px;
+        margin-right: -8px;
+        margin-left: -16px;
+        height: 96px;
+    }
     body {
-        background-color: bisque;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
     }
     .formContainer {
-        border: 2px solid;
         background-color: aliceblue;
-        padding-left: 6%;
-        padding-top: 57px;
+        padding-left: 49%;
+        padding-top: 40px;
         padding-bottom: 41px;
-        margin-left: 27%;
+        margin-left: 25%;
         margin-right: 49%;
         margin-top: 6%;
     }
-    .detailContainer {
-        border: 2px solid;
-        background-color: aliceblue;
-        padding-left: 6%;
-        padding-top: 38px;
-        padding-bottom: 173px;
-        margin-left: 27%;
-        margin-right: 49%;
-        margin-top: 0%;
+    
+    #expense-form label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        
     }
-    ul#addExpensesDetails {
-        margin-left: -68px;
+    #expense-form input {
+        width: 97%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    #expense-form {
+        margin-left: -678px;
+    }
+    button:hover {
+        background-color: #087296;
+        color: hsl(0, 0%, 98%);
+        cursor: pointer;
+    }
+    select#category {
+        width: 99%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    button#buttn {
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    #downloadExpense{
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    #expenseDetails{
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    #showLeaderBoard{
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    button#premiumButton {
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+    }
+    .detailContainer {
+        margin-left: -677px;
+    }
+    div#leaderboard {
+        margin-left: -677px;
+        margin-top: -4px;
     }
 </style>
 <body>
+    <div id="head"><h1 style="padding-top: 24px;">Expense Tracker</h1></div>
     <div class="formContainer">
-        <form action="/expense" method="POST">
+        <form id="expense-form" action="/expense" method="POST">
             <h2>Expense app</h2>
             <label for="chooseExpense">Enter Expense Amount</label><br>
             <input type="number" id="expenseAmount" name="expenseAmount"><br>
@@ -61,24 +119,27 @@
             </div>
             
         </form>
-    </div>
-    <div class="detailContainer">
-        <h2 id="form2">Expenses Details</h2>
-        <ul id="addExpensesDetails"></ul>
-        <div class="flexpage" style="display: flex;">
-            <div id="pagination"></div>
-            <div class="noOfExpenseToShow">
-                <select name="chooseOption" id="selectNoOfExpensesToShow">
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="30">30</option>
-                    <option value="50">50</option>
-                </select>
+        <div class="detailContainer">
+            <h2 id="form2">Expenses Details</h2>
+            <ul id="addExpensesDetails"></ul>
+            <div class="flexpage" style="display: flex;">
+                <div id="pagination"></div>
+                <div class="noOfExpenseToShow">
+                    <select name="chooseOption" id="selectNoOfExpensesToShow">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
             </div>
         </div>
+        <h2 style="margin-left: -677px;">Leaderboard Details</h2>
+        <div id="leaderboard">
+        </div>
     </div>
-    <div id="leaderboard"></div>
+    
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         const downloadExp=document.getElementById('downloadExpense');
@@ -164,7 +225,7 @@
                 const btn=document.createElement('button');
                 btn.addEventListener('click',async()=>{
                     list.remove();
-                    await deleteData(response.data.expenseData.response.id);
+                    await deleteData(response.data.expenseData.response.signupDatumId);
                 })
                 btn.textContent='Delete expense';
                 list.innerHTML=expenseAmount+" - "+Description+" - "+category+" - ";
@@ -192,7 +253,9 @@
                         'Authorization': `Bearer ${token}`
                     }
                 });
+                console.log(response.data);
                 showPagination(response.data);
+                
 
                 const getExpense = response.data.getExpense;
                 updateUI(getExpense);
